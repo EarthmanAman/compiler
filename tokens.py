@@ -26,3 +26,5 @@ TT_COMMA  = "COMMA"
 TT_IDENTIFIER   = "IDENTIFIER"
 TT_KEYWORD      = "KEYWORD"
 TT_EQ           = "EQUAL"
+
+TT_EOF 		= "EOF"

@@ -7,8 +7,8 @@ result, error, symbolTable = lexer.run('program', data)
 
 if error: print(error.as_string())
 else: 
-	for token in result:
-		print(token)
+	print(result)
+
 if not error:
 	print("\n\n Below is our Symbol Table \n\n")
 	print("Name\tAddress \t\tType\n")

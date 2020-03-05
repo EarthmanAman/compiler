@@ -20,4 +20,5 @@ KEYWORDS = [
     "Else",
     ".",
     "!",
+    "VAR",
 ]
