@@ -260,15 +260,17 @@ class BinOpNode:
     def __repr__(self):
         return f'({self.left_node}, {self.op_tok}, {self.right_node})'
 class HeadNode:
-    def __init__(self, op_tok):
+    def __init__(self,left_node, op_tok, right_node):
         
         self.op_tok = op_tok
-
+        self.left_node = left_node
+        self.right_node = right_node
         self.pos_start = self.op_tok.pos_start
         self.pos_end = self.op_tok.pos_end
 
     def __repr__(self):
-        return f'({self.op_tok})'
+        
+        return f'({self.left_node}) ({self.op_tok}) ({self.right_node})'
 
 class UnaryOpNode:
     def __init__(self, op_tok, node):
@@ -326,11 +328,10 @@ class Parser:
 
     def parse(self):
         res = self.head()
-        if not res.error and self.current_tok.type != TT_EOF:
-            return res.failure(InvalidSyntaxError(
-                self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected 'HEAD'"
-            ))
+        res.register_advancement()
+        self.advance()
+
+
         return res
 
     ###################################
@@ -405,12 +406,37 @@ class Parser:
 
     def term(self):
         return self.bin_op(self.factor, (TT_MUL, TT_DIV))
+   
     def head(self):
         res = ParseResult()
         if self.current_tok.getValue() == "HEAD":
             headStr = self.current_tok
-            if res.error: return res
-            return res.success(HeadNode(headStr))
+            if res.error: 
+                return res
+            res.register_advancement()
+            self.advance()
+            left_node = None
+            right_node = None
+            body = None
+            if self.current_tok.getValue() != None:
+                newTokens = []
+                bodyIndex = None
+                for index, token in enumerate(self.tokens):
+                    if token.getValue() == "BODY":
+                        body = self.tokens[index + 1:]
+                        bodyIndex = index
+                        break
+                    else:
+                        newTokens.append(token)
+                self.tokens = newTokens[:]
+                left_node = res.register(self.expr())
+                
+                self.tokens = body[:]
+                res.register_advancement()
+                self.advance()
+                
+                right_node = res.register(self.expr())
+            return res.success(HeadNode(left_node, headStr, right_node))
 
         else:
             return res.failure(InvalidSyntaxError(
